@@ -6,6 +6,7 @@ from django.shortcuts import get_object_or_404
 from ninja import Query, Router
 from ninja.errors import HttpError
 from ninja.security import django_auth_is_staff
+from ninja.pagination import paginate, PageNumberPagination
 
 from .models import User
 from .schemas import (
@@ -45,17 +46,14 @@ def create_user(request, user: UserSchema):
     summary='Listar usuários',
     auth=django_auth_is_staff,
 )
+@paginate(PageNumberPagination)
 def list_users(
     request,
-    offset: int = Query(0, ge=0, description='Número de registros para pular'),
-    limit: int = Query(100, ge=1, le=100, description='Limite de registros'),
     search: UserFilterSchema = Query(None),
 ):
     queryset = User.objects.all()
     if search:
         queryset = search.filter(queryset)
-
-    queryset = queryset[offset : offset + limit]
 
     return queryset
 

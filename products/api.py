@@ -3,6 +3,7 @@ from typing import List
 
 from django.shortcuts import get_object_or_404
 from ninja import File, Form, Query, Router, UploadedFile
+from ninja.pagination import paginate, PageNumberPagination
 
 from .models import Product
 from .schemas import (
@@ -37,18 +38,15 @@ def create_product(
     response={HTTPStatus.OK: List[ProductPublicSchema]},
     summary='Listar produtos',
 )
+@paginate(PageNumberPagination)
 def list_products(
     request,
-    offset: int = Query(0, ge=0, description='Número de registros para pular'),
-    limit: int = Query(100, ge=1, le=100, description='Limite de registros'),
     filters: ProductFilterSchema = Query(None),
 ):
     queryset = Product.objects.prefetch_related('reviews').all()
 
     if filters:
         queryset = filters.filter(queryset)
-
-    queryset = queryset[offset : offset + limit]
 
     return queryset
 

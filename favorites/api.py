@@ -4,6 +4,7 @@ from typing import List
 from django.shortcuts import get_object_or_404
 from ninja import Query, Router
 from ninja.errors import HttpError
+from ninja.pagination import paginate, PageNumberPagination
 
 from products.models import Product
 
@@ -41,17 +42,15 @@ def add_favorite_product(request, product: FavoriteSchema):
     response={HTTPStatus.OK: List[FavoritePublicSchema]},
     summary='Listar produtos favoritados',
 )
+@paginate(PageNumberPagination)
 def list_favorite(
     request,
-    offset: int = Query(0, ge=0, description='Número de registros para pular'),
-    limit: int = Query(100, ge=1, le=100, description='Limite de registros'),
 ):
-
     queryset = Favorite.objects.select_related('product').filter(
         user=request.auth
     )
 
-    return queryset[offset : offset + limit]
+    return queryset
 
 
 @router.delete(
