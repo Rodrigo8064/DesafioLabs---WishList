@@ -35,7 +35,7 @@ async def create_user(request, user: UserSchema):
         if user_exists.username == user.username:
             raise HttpError(HTTPStatus.BAD_REQUEST, 'Username já está em uso')
 
-    user = User.objects.acreate_user(**user.dict())
+    user = await User.objects.acreate_user(**user.dict())
     return user
 
 

@@ -34,7 +34,9 @@ async def add_favorite_product(request, product: FavoriteSchema):
             HTTPStatus.BAD_REQUEST, 'Você já favoritou este produto'
         )
 
-    return await Favorite.objects.select_related('product').aget(id=favorite.id)
+    return await Favorite.objects.filter(id=favorite.id).select_related(
+        'product'
+    ).prefetch_related('product__reviews').aget()
 
 
 @router.get(
@@ -48,7 +50,7 @@ async def list_favorite(
 ):
     queryset = Favorite.objects.select_related('product').filter(
         user=request.auth
-    )
+    ).prefetch_related('product__reviews')
 
     return queryset
 

@@ -68,7 +68,6 @@ class ProductPublicSchema(Schema):
     image: Optional[str] = None
     brand: str
     reviews: List[ReviewProductSchema] = []
-    average_stars: Optional[float] = None
     created_at: datetime
     update_at: Optional[datetime]
 
@@ -80,13 +79,6 @@ class ProductPublicSchema(Schema):
             except ValueError:
                 return None
         return None
-
-    @staticmethod
-    def resolve_average_stars(obj):
-        reviews = obj.reviews.all()
-        if reviews:
-            return sum(r.stars for r in reviews) / len(reviews)
-        return 0
 
 
 class ProductFilterSchema(FilterSchema):

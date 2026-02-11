@@ -32,11 +32,8 @@ ALLOWED_HOSTS = ['*']
 # Application definition
 
 INSTALLED_APPS = [
-    'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
     'django.contrib.staticfiles',
     'users',
     'products',
@@ -47,11 +44,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    #'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    #'django.middleware.csrf.CsrfViewMiddleware',
-    #'django.contrib.auth.middleware.AuthenticationMiddleware',
-    #'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     "ninja.compatibility.files.fix_request_files_middleware",
 ]
@@ -140,3 +133,5 @@ JWT_ALGORITHM = os.getenv('JWT_ALGORITHM', 'algorithm')
 JWT_EXPIRATION_MINUTES = os.getenv('JWT_EXPIRATION_MINUTES', '')
 
 NINJA_PAGINATION_PER_PAGE = 15
+
+SILENCED_SYSTEM_CHECKS = ["admin.E408", "auth.E009"]

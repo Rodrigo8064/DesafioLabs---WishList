@@ -29,8 +29,9 @@ async def create_product(
     )
     if file:
         new_product.image.save(file.name, file, save=True)
+        await new_product.asave()
 
-    return new_product
+    return await Product.objects.prefetch_related('reviews').aget(id=new_product.id)
 
 
 @router.get(
