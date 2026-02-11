@@ -1,10 +1,10 @@
 from http import HTTPStatus
 from typing import List
 
-from django.shortcuts import get_object_or_404
-from ninja import Query, Router
+from django.shortcuts import aget_object_or_404
+from ninja import Router
 from ninja.errors import HttpError
-from ninja.pagination import paginate, PageNumberPagination
+from ninja.pagination import PageNumberPagination, paginate
 
 from products.models import Product
 
@@ -19,13 +19,13 @@ router = Router(tags=['favorites'])
     response={HTTPStatus.CREATED: FavoritePublicSchema},
     summary='Favoritar produto',
 )
-def add_favorite_product(request, product: FavoriteSchema):
-    if not Product.objects.filter(id=product.product_id).exists():
+async def add_favorite_product(request, product: FavoriteSchema):
+    if not await Product.objects.filter(id=product.product_id).aexists():
         raise HttpError(HTTPStatus.NOT_FOUND, 'Produto não encontrado')
 
     user = request.auth
 
-    favorite, created = Favorite.objects.get_or_create(
+    favorite, created = await Favorite.objects.aget_or_create(
         user=user, product_id=product.product_id
     )
 
@@ -34,7 +34,7 @@ def add_favorite_product(request, product: FavoriteSchema):
             HTTPStatus.BAD_REQUEST, 'Você já favoritou este produto'
         )
 
-    return Favorite.objects.select_related('product').get(id=favorite.id)
+    return await Favorite.objects.select_related('product').aget(id=favorite.id)
 
 
 @router.get(
@@ -43,7 +43,7 @@ def add_favorite_product(request, product: FavoriteSchema):
     summary='Listar produtos favoritados',
 )
 @paginate(PageNumberPagination)
-def list_favorite(
+async def list_favorite(
     request,
 ):
     queryset = Favorite.objects.select_related('product').filter(
@@ -58,8 +58,8 @@ def list_favorite(
     response={HTTPStatus.NO_CONTENT: None},
     summary='Deletar Produto Favoritado',
 )
-def delete_favorite_product(request, product_id: int):
-    product = get_object_or_404(
+async def delete_favorite_product(request, product_id: int):
+    product = await aget_object_or_404(
         Favorite, product_id=product_id, user=request.auth
     )
-    product.delete()
+    await product.adelete()

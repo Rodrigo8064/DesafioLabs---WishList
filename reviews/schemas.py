@@ -41,3 +41,12 @@ class ReviewPublicSchema(Schema):
     stars: int
     comment: Optional[str] = None
     created_at: datetime
+
+
+class ReviewProductSchema(Schema):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    stars: int
+    comment: Optional[str] = None
+    created_at: datetime

@@ -1,9 +1,9 @@
 from http import HTTPStatus
 from typing import List
 
-from django.shortcuts import get_object_or_404
+from django.shortcuts import aget_object_or_404
 from ninja import File, Form, Query, Router, UploadedFile
-from ninja.pagination import paginate, PageNumberPagination
+from ninja.pagination import PageNumberPagination, paginate
 
 from .models import Product
 from .schemas import (
@@ -21,10 +21,10 @@ router = Router(tags=['products'])
     response={HTTPStatus.CREATED: ProductPublicSchema},
     summary='Criar Produtos',
 )
-def create_product(
+async def create_product(
     request, product: Form[ProductSchema], file: File[UploadedFile] = None
 ):
-    new_product = Product.objects.create(
+    new_product = await Product.objects.acreate(
         **product.dict(),
     )
     if file:
@@ -39,7 +39,7 @@ def create_product(
     summary='Listar produtos',
 )
 @paginate(PageNumberPagination)
-def list_products(
+async def list_products(
     request,
     filters: ProductFilterSchema = Query(None),
 ):
@@ -56,8 +56,8 @@ def list_products(
     response={HTTPStatus.OK: ProductPublicSchema},
     summary='Buscar produto por ID',
 )
-def get_product(request, product_id: int):
-    product = get_object_or_404(
+async def get_product(request, product_id: int):
+    product = await aget_object_or_404(
         Product.objects.prefetch_related('reviews'), id=product_id
     )
 
@@ -69,13 +69,13 @@ def get_product(request, product_id: int):
     response={HTTPStatus.OK: ProductPublicSchema},
     summary='Atualizar produto',
 )
-def update_product(
+async def update_product(
     request,
     product_id: int,
     product_update: Form[ProductUpdateSchema],
     file: File[UploadedFile] = None,
 ):
-    product = get_object_or_404(
+    product = await aget_object_or_404(
         Product.objects.prefetch_related('reviews'), id=product_id
     )
 
@@ -87,7 +87,7 @@ def update_product(
     if file:
         product.image.save(file.name, file, save=False)
 
-    product.save()
+    await product.asave()
 
     return product
 
@@ -97,7 +97,7 @@ def update_product(
     response={HTTPStatus.NO_CONTENT: None},
     summary='Deletar produto',
 )
-def delete_product(request, product_id: int):
-    product = get_object_or_404(Product, id=product_id)
+async def delete_product(request, product_id: int):
+    product = await aget_object_or_404(Product, id=product_id)
 
-    product.delete()
+    await product.adelete()

@@ -5,7 +5,7 @@ from typing import Annotated, List, Optional
 from ninja import FilterLookup, FilterSchema, Schema
 from pydantic import ConfigDict, field_validator
 
-from reviews.schemas import ReviewPublicSchema
+from reviews.schemas import ReviewProductSchema
 
 
 class ProductSchema(Schema):
@@ -67,7 +67,7 @@ class ProductPublicSchema(Schema):
     description: Optional[str] = None
     image: Optional[str] = None
     brand: str
-    reviews: List[ReviewPublicSchema] = []
+    reviews: List[ReviewProductSchema] = []
     average_stars: Optional[float] = None
     created_at: datetime
     update_at: Optional[datetime]
@@ -93,3 +93,5 @@ class ProductFilterSchema(FilterSchema):
     search: Annotated[
         Optional[str], FilterLookup(['title__Icontains', 'brand__icontains'])
     ] = None
+    min_price: Annotated[Optional[Decimal], FilterLookup('price__gte')] = None
+    max_price: Annotated[Optional[Decimal], FilterLookup('price__lte')] = None

@@ -1,6 +1,6 @@
 from http import HTTPStatus
 
-from django.shortcuts import get_object_or_404
+from django.shortcuts import aget_object_or_404
 from ninja import Router
 
 from .models import Review
@@ -14,10 +14,10 @@ router = Router(tags=['reviews'])
     response={HTTPStatus.CREATED: ReviewPublicSchema},
     summary='Criar review',
 )
-def create_review(request, review: ReviewSchema):
-    new_review = Review.objects.create(**review.dict())
+async def create_review(request, review: ReviewSchema):
+    new_review = await Review.objects.acreate(**review.dict())
 
-    result = Review.objects.select_related('product').get(id=new_review.id)
+    result = await Review.objects.select_related('product').aget(id=new_review.id)
     return result
 
 
@@ -26,8 +26,8 @@ def create_review(request, review: ReviewSchema):
     response={HTTPStatus.OK: ReviewPublicSchema},
     summary='Atualizar review',
 )
-def update_review(request, review_id: int, review_update: ReviewUpdateSchema):
-    review = get_object_or_404(
+async def update_review(request, review_id: int, review_update: ReviewUpdateSchema):
+    review = await aget_object_or_404(
         Review.objects.select_related('product'), id=review_id
     )
     update_data = review_update.dict(exclude_unset=True)
@@ -35,7 +35,7 @@ def update_review(request, review_id: int, review_update: ReviewUpdateSchema):
     for attr, value in update_data.items():
         setattr(review, attr, value)
 
-    review.save()
+    await review.asave()
 
     return review
 
@@ -45,6 +45,6 @@ def update_review(request, review_id: int, review_update: ReviewUpdateSchema):
     response={HTTPStatus.NO_CONTENT: None},
     summary='Deletar review',
 )
-def delete_review(request, review_id: int):
-    review = get_object_or_404(Review, id=review_id)
-    review.delete()
+async def delete_review(request, review_id: int):
+    review = await aget_object_or_404(Review, id=review_id)
+    await review.adelete()

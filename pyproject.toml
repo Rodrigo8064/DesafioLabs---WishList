@@ -12,7 +12,10 @@ dependencies = [
     "pydantic[email] (>=2.12.5,<3.0.0)",
     "pyjwt (>=2.11.0,<3.0.0)",
     "pillow (>=12.1.0,<13.0.0)",
-    "dotenv (>=0.9.9,<0.10.0)"
+    "dotenv (>=0.9.9,<0.10.0)",
+    "gunicorn (>=25.0.3,<26.0.0)",
+    "uvicorn (>=0.40.0,<0.41.0)",
+    "psycopg (>=3.3.2,<4.0.0)"
 ]
 
 
@@ -23,7 +26,10 @@ build-backend = "poetry.core.masonry.api"
 [dependency-groups]
 dev = [
     "ruff (>=0.15.0,<0.16.0)",
-    "taskipy (>=1.14.1,<2.0.0)"
+    "taskipy (>=1.14.1,<2.0.0)",
+    "pytest (>=9.0.2,<10.0.0)",
+    "pytest-django (>=4.11.1,<5.0.0)",
+    "pytest-cov (>=7.0.0,<8.0.0)"
 ]
 
 [tool.ruff]
@@ -71,9 +77,22 @@ ignore = ['PLR2004', 'PLR0917', 'PLR0913']
 preview = true
 quote-style = 'single'
 
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "app.settings"
+pythonpath = "."
+django_find_project = true
+addopts = "--cov=. --cov-report=term-missing --cov-report=html"
+python_files = ["tests.py", "test_*.py", "*_tests.py"]
+
+[tool.coverage.run]
+source = ["."]
+omit = ["*tests*", "*migrations*", "*manage.py*", "*asgi.py*", "*wsgi.py*"]
+
 [tool.taskipy.tasks]
 lint = 'ruff check'
 pre_format = 'ruff check --fix'
 format = 'ruff format'
 run = 'python manage.py runserver 0.0.0.0:8001'
 pre_test = 'task lint'
+test = 'pytest -s -x --cov=labs_wishlist -vv'
+post_test = 'coverage html'

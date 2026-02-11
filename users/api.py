@@ -2,11 +2,10 @@ from http import HTTPStatus
 from typing import List
 
 from django.db.models import Q
-from django.shortcuts import get_object_or_404
+from django.shortcuts import aget_object_or_404
 from ninja import Query, Router
 from ninja.errors import HttpError
-from ninja.security import django_auth_is_staff
-from ninja.pagination import paginate, PageNumberPagination
+from ninja.pagination import PageNumberPagination, paginate
 
 from .models import User
 from .schemas import (
@@ -25,10 +24,10 @@ router = Router(tags=['users'])
     summary='Criar novo usuário',
     auth=None,
 )
-def create_user(request, user: UserSchema):
-    user_exists = User.objects.filter(
+async def create_user(request, user: UserSchema):
+    user_exists = await User.objects.filter(
         Q(email=user.email) | Q(username=user.username)
-    ).first()
+    ).afirst()
 
     if user_exists:
         if user_exists.email == user.email:
@@ -36,7 +35,7 @@ def create_user(request, user: UserSchema):
         if user_exists.username == user.username:
             raise HttpError(HTTPStatus.BAD_REQUEST, 'Username já está em uso')
 
-    user = User.objects.create_user(**user.dict())
+    user = User.objects.acreate_user(**user.dict())
     return user
 
 
@@ -44,10 +43,9 @@ def create_user(request, user: UserSchema):
     '/',
     response={200: List[UserPublicSchema]},
     summary='Listar usuários',
-    auth=django_auth_is_staff,
 )
 @paginate(PageNumberPagination)
-def list_users(
+async def list_users(
     request,
     search: UserFilterSchema = Query(None),
 ):
@@ -62,10 +60,9 @@ def list_users(
     '/{user_id}',
     response={HTTPStatus.OK: UserPublicSchema},
     summary='Buscar usuário por ID',
-    auth=django_auth_is_staff,
 )
-def get_user(request, user_id: int):
-    user = get_object_or_404(User, id=user_id)
+async def get_user(request, user_id: int):
+    user = await aget_object_or_404(User, id=user_id)
     return user
 
 
@@ -74,10 +71,10 @@ def get_user(request, user_id: int):
     response={HTTPStatus.OK: UserPublicSchema},
     summary='Atualizar usuário',
 )
-def update_user(request, user_id: int, user_update: UserUpdateSchema):
+async def update_user(request, user_id: int, user_update: UserUpdateSchema):
     if request.auth.id != user_id:
         raise HttpError(HTTPStatus.FORBIDDEN, 'Not emough permissions')
-    user = get_object_or_404(User, id=user_id)
+    user = await aget_object_or_404(User, id=user_id)
 
     for attr, value in user_update.dict(exclude_unset=True).items():
         if attr == 'password':
@@ -85,7 +82,7 @@ def update_user(request, user_id: int, user_update: UserUpdateSchema):
         else:
             setattr(user, attr, value)
 
-    user.save()
+    await user.asave()
 
     return user
 
@@ -94,8 +91,7 @@ def update_user(request, user_id: int, user_update: UserUpdateSchema):
     '/{user_id}',
     response={HTTPStatus.NO_CONTENT: None},
     summary='Deletar usuário',
-    auth=django_auth_is_staff,
 )
-def delete_user(request, user_id: int):
-    user = get_object_or_404(User, id=user_id)
-    user.delete()
+async def delete_user(request, user_id: int):
+    user = await aget_object_or_404(User, id=user_id)
+    await user.adelete()

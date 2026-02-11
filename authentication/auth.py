@@ -41,13 +41,14 @@ def decode_jwt_token(token: str) -> dict | None:
 
 class BearerAuth(HttpBearer):
     @typing.override
-    def authenticate(self, request, token: str):
+    async def authenticate(self, request, token: str):
         payload = decode_jwt_token(token)
         if not payload:
             return None
 
         try:
-            user = User.objects.get(id=payload['user_id'])
+            user = await User.objects.aget(id=payload['user_id'])
+            request.user = user
             return user
         except User.DoesNotExist:
             return None
