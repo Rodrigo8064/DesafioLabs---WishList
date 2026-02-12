@@ -20,7 +20,7 @@ Esta é uma API de alta performance desenvolvida com Django Ninja, focada em ope
 
 ### 1. Clonar o Repositório
 ```bash
-git clone [https://github.com/Rodrigo8064/DesafioLabs_WishList.git](https://github.com/Rodrigo8064/DesafioLabs_WishList.git)
+git clone https://github.com/Rodrigo8064/DesafioLabs_WishList.git
 cd seu-repositorio
 ```
 
@@ -74,3 +74,4 @@ Middleware Minimalista: Removidos SessionMiddleware e AuthenticationMiddleware p
 Async ORM: Todas as queries utilizam aget, acreate, adelete e prefetch_related para não bloquear o Event Loop.
 
 Docker Optimized: Build multi-stage baseado em Alpine Linux para imagens leves e rápidas.
+
